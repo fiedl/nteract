@@ -1,4 +1,5 @@
 import * as log from "electron-log";
+import 'symbol-observable';
 import { existsSync } from "fs";
 import * as jupyterPaths from "jupyter-paths";
 import * as kernelspecs from "kernelspecs";
