@@ -23,14 +23,14 @@ import {
   OnDiskDisplayData,
   OnDiskExecuteResult,
   OnDiskOutput,
-  OnDiskStreamOutput
+  OnDiskStreamOutput,
 } from "@nteract/commutable";
 import { UpdateDisplayDataContent } from "@nteract/messaging";
 import {
   DocumentRecordProps,
   makeDocumentRecord,
   NotebookModel,
-  PayloadMessage
+  PayloadMessage,
 } from "@nteract/types";
 import { escapeCarriageReturnSafe } from "escape-carriage";
 import { fromJS, List, Map, RecordOf, Set } from "immutable";
@@ -162,7 +162,7 @@ function toggleTagInCell(
 
   return state.updateIn(
     ["notebook", "cellMap", id, "metadata", "tags"],
-    tags => {
+    (tags) => {
       if (tags) {
         return tags.has(tag) ? tags.remove(tag) : tags.add(tag);
       } else {
@@ -193,7 +193,7 @@ function clearAllOutputs(
       if ((cell as any).get("cell_type") === "code") {
         return (cell as ImmutableCodeCell).merge({
           outputs: List(),
-          execution_count: null
+          execution_count: null,
         });
       }
       return cell;
@@ -202,7 +202,7 @@ function clearAllOutputs(
   // Clear all the transient data too
   const transient = Map({
     keyPathsForDisplays: Map(),
-    cellMap: cellMap.map(() => Map())
+    cellMap: cellMap.map(() => Map()),
   });
 
   return state
@@ -229,7 +229,7 @@ function updateAllDisplaysWithID(
     state.getIn([
       "transient",
       "keyPathsForDisplays",
-      content.transient.display_id
+      content.transient.display_id,
     ]) || List();
 
   const updateOutput = (output: any) => {
@@ -237,14 +237,14 @@ function updateAllDisplaysWithID(
       // We already have something here, don't change the other fields
       return output.merge({
         data: createFrozenMediaBundle(content.data),
-        metadata: fromJS(content.metadata || {})
+        metadata: fromJS(content.metadata || {}),
       });
     } else if (content.output_type === "update_display_data") {
       // Nothing here and we have no valid output, just create a basic output
       return {
         data: createFrozenMediaBundle(content.data),
         metadata: fromJS(content.metadata || {}),
-        output_type: "display_data"
+        output_type: "display_data",
       };
     } else {
       // Nothing here, but we have a valid output
@@ -310,7 +310,7 @@ function appendOutput(
     "cellMap",
     cellId,
     "outputs",
-    outputIndex
+    outputIndex,
   ]);
 
   const keyPaths: KeyPaths = (
@@ -556,7 +556,7 @@ function acceptPayloadMessage(
 
   if (payload.source === "page") {
     // append pager
-    return state.updateIn(["cellPagers", id], l =>
+    return state.updateIn(["cellPagers", id], (l) =>
       (l || List()).push(payload.data)
     );
   } else if (payload.source === "set_next_input") {
@@ -576,8 +576,8 @@ function acceptPayloadMessage(
           // TODO: is payload.text guaranteed to be defined?
           source: payload.text || "",
           id,
-          contentRef: action.payload.contentRef
-        }
+          contentRef: action.payload.contentRef,
+        },
       });
     }
   }
@@ -612,7 +612,7 @@ function toggleCellOutputVisibility(
       id,
       "metadata",
       "jupyter",
-      "outputs_hidden"
+      "outputs_hidden",
     ])
   );
 }
@@ -631,7 +631,7 @@ function unhideAll(
     metadataMixin = metadataMixin.set("source_hidden", inputHidden);
   }
 
-  return state.updateIn(["notebook", "cellMap"], cellMap =>
+  return state.updateIn(["notebook", "cellMap"], (cellMap) =>
     cellMap.map((cell: ImmutableCell) => {
       if ((cell as any).get("cell_type") === "code") {
         return cell.mergeIn(["metadata", "jupyter"], metadataMixin);
@@ -658,7 +658,7 @@ function toggleCellInputVisibility(
       id,
       "metadata",
       "jupyter",
-      "source_hidden"
+      "source_hidden",
     ])
   );
 }
@@ -682,7 +682,7 @@ function updateOutputMetadata(
     item.set(
       "metadata",
       fromJS({
-        [mediaType]: metadata
+        [mediaType]: metadata,
       })
     )
   );
@@ -710,7 +710,7 @@ function setKernelMetadata(
         fromJS({
           name: kernelInfo.name,
           language: kernelInfo.language,
-          display_name: kernelInfo.displayName
+          display_name: kernelInfo.displayName,
         })
       )
       .setIn(["notebook", "metadata", "kernel_info", "name"], kernelInfo.name);
@@ -824,21 +824,21 @@ function changeCellType(
       return nextState.setIn(
         ["notebook", "cellMap", id],
         makeCodeCell({
-          source: cell.source
+          source: cell.source,
         })
       );
     case "markdown":
       return nextState.setIn(
         ["notebook", "cellMap", id],
         makeMarkdownCell({
-          source: cell.source
+          source: cell.source,
         })
       );
     case "raw":
       return nextState.setIn(
         ["notebook", "cellMap", id],
         makeRawCell({
-          source: cell.source
+          source: cell.source,
         })
       );
   }
@@ -860,15 +860,10 @@ function toggleOutputExpansion(
   return state.updateIn(
     ["notebook", "cellMap"],
     (cells: Map<CellId, ImmutableCell>) =>
-      cells
-        .setIn(
-          [id, "metadata", "collapsed"],
-          !cells.getIn([id, "metadata", "collapsed"])
-        )
-        .setIn(
-          [id, "metadata", "outputExpanded"],
-          !cells.getIn([id, "metadata", "outputExpanded"])
-        )
+      cells.setIn(
+        [id, "metadata", "collapsed"],
+        !cells.getIn([id, "metadata", "collapsed"])
+      )
   );
 }
 
@@ -877,10 +872,10 @@ function promptInputRequest(
   action: actionTypes.PromptInputRequest
 ): RecordOf<DocumentRecordProps> {
   const { id, password, prompt } = action.payload;
-  return state.updateIn(["cellPrompts", id], prompts =>
+  return state.updateIn(["cellPrompts", id], (prompts) =>
     prompts.push({
       prompt,
-      password
+      password,
     })
   );
 }
@@ -889,7 +884,7 @@ function interruptKernelSuccessful(
   state: NotebookModel,
   action: actionTypes.InterruptKernelSuccessful
 ): RecordOf<DocumentRecordProps> {
-  return state.updateIn(["transient", "cellMap"], cells =>
+  return state.updateIn(["transient", "cellMap"], (cells) =>
     cells.map((cell: Map<string, string>) => {
       if (cell.get("status") === "queued" || cell.get("status") === "running") {
         return cell.set("status", "");
@@ -941,7 +936,7 @@ type DocumentAction =
   | actionTypes.InterruptKernelSuccessful;
 
 const defaultDocument: NotebookModel = makeDocumentRecord({
-  notebook: emptyNotebook
+  notebook: emptyNotebook,
 });
 
 export function notebook(

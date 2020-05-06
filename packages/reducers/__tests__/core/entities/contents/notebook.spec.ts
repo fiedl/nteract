@@ -786,7 +786,6 @@ describe("toggleOutputExpansion", () => {
       cells =>
         cells.map(value =>
           value
-            .setIn(["metadata", "outputExpanded"], false)
             .setIn(["metadata", "collapsed"], true)
         )
     );
@@ -795,9 +794,6 @@ describe("toggleOutputExpansion", () => {
       originalState,
       actions.toggleOutputExpansion({ id })
     );
-    expect(
-      state.getIn(["notebook", "cellMap", id, "metadata", "outputExpanded"])
-    ).toBe(true);
     expect(
       state.getIn(["notebook", "cellMap", id, "metadata", "collapsed"])
     ).toBe(false);
